@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Studio Book",
+    "slug": "studio-book-mobile",
+    "scheme": "studiobook",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f5f7f5",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.example.studiobook"
+    },
+    "android": {
+      "package": "com.example.studiobook",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {"typedRoutes": true}
+  }
+}

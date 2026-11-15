@@ -21,3 +21,13 @@ test('予約ステータス名',()=>{
  assert.equal(statusLabel('paid',false),'決済済み');
  assert.equal(statusLabel('canceled',false),'キャンセル済み');
 });
+
+test('営業時間のopenイベントは予約重複として扱わない', () => {
+ const start = new Date(2026,10,16,10,0), end = new Date(2026,10,16,11,0);
+ assert.equal(overlapsEvents(start,end,[{type:'open',start:'2026-11-16T09:00:00',end:'2026-11-16T18:00:00',allDay:false}]),false);
+ assert.equal(overlapsEvents(start,end,[{type:'reservation',start:'2026-11-16T10:30:00',end:'2026-11-16T11:30:00',allDay:false}]),true);
+});
+test('終日休館は当日の予約をブロック', () => {
+ const start = new Date(2026,10,16,10,0), end = new Date(2026,10,16,11,0);
+ assert.equal(overlapsEvents(start,end,[{type:'closure',start:'2026-11-16',end:'2026-11-17',allDay:true}]),true);
+});

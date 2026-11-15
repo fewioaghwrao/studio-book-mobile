@@ -28,12 +28,24 @@ export type CalendarEvent = {
   start: string;
   end: string;
   allDay: boolean;
+  type: 'open' | 'closure' | 'reservation';
+};
+export type RoomReview = {
+  id: number;
+  score: number | null;
+  content: string;
+  userName: string;
+  hostReply: string | null;
+  hostReplyAt: string | null;
+  createdAtUtc: string;
 };
 export type RoomDetail = RoomListItem & {
   capacity: number;
   hostName: string;
   businessHours: BusinessHour[];
   calendarEvents: CalendarEvent[];
+  reviews: RoomReview[];
+  hiddenHostReplies: RoomReview[];
   priceRules?: Array<{ id: number; note: string | null }>;
 };
 export type Member = {
@@ -91,3 +103,69 @@ export type ConfirmResponse = {
   checkoutUrl: string;
 };
 export type EditMember = Pick<Member, 'name' | 'kana' | 'postalCode' | 'address' | 'phoneNumber' | 'email'>;
+
+// 既存 Next.js 版（/rooms/ai-search）の API レスポンスと同じ契約。
+export type AiRequestedSlot = {
+  startAt: string;
+  endAt: string;
+  durationAssumed: boolean;
+};
+export type AiRoomSearchConditions = {
+  keyword: string | null;
+  area: string | null;
+  price: number | null;
+  capacity: number | null;
+  capacityCondition: 'min' | 'max' | 'exact' | null;
+  purpose: string | null;
+  atmosphere: string | null;
+  timePreference: string | null;
+  date?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  durationMinutes?: number | null;
+  keywords: string[];
+};
+export type AiRoomAvailability = {
+  status: string;
+  label: string;
+  isAvailable: boolean;
+};
+export type AiRoomSearchItem = RoomListItem & {
+  capacity: number;
+  reason: string;
+  reasons?: string[];
+  availability?: AiRoomAvailability | null;
+};
+export type AiRoomSearchResponse = {
+  query: string;
+  interpretedConditions: AiRoomSearchConditions;
+  rooms: AiRoomSearchItem[];
+  requestedSlot?: AiRequestedSlot | null;
+  relaxed?: boolean;
+  notices?: string[];
+};
+
+// Web版 /api/rooms/{roomId}/reviews/new のレスポンス契約。
+export type ReviewListItem = {
+  id: number;
+  score: number;
+  content: string;
+  userName: string;
+  createdAtUtc: string;
+};
+export type ReviewPageResponse = {
+  roomId: number;
+  roomName: string;
+  roomImageName: string | null;
+  roomAddress: string;
+  averageScore: number;
+  reviewCount: number;
+  reviews: ReviewListItem[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  alreadyReviewed: boolean;
+  canReview: boolean;
+};
+export type AiReviewAssistResponse = { assistedContent: string };

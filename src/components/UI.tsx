@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
 import { C } from '../theme';
 export function Button({title,onPress,disabled=false,loading=false,secondary=false,danger=false}:{title:string;onPress:()=>void;disabled?:boolean;loading?:boolean;secondary?:boolean;danger?:boolean}) {
@@ -12,6 +12,29 @@ export function Field({label,value,onChangeText,placeholder,secureTextEntry,keyb
   accessibilityLabel={label} value={value} onChangeText={onChangeText} placeholder={placeholder}
   placeholderTextColor="#A1ADA6" secureTextEntry={secureTextEntry} keyboardType={keyboardType} autoCapitalize={autoCapitalize??'none'}
   multiline={multiline} style={[styles.field,multiline&&{height:90,textAlignVertical:'top'}]} />
+ </View>;
+}
+/** ログイン画面用の表示・非表示切替つきパスワード欄。入力値は切替時も保持する。 */
+export function PasswordField({value,onChangeText,placeholder='パスワードを入力'}:{value:string;onChangeText:(v:string)=>void;placeholder?:string}) {
+ const [visible,setVisible] = useState(false);
+ return <View style={{gap:7}}>
+  <Text style={styles.fieldLabel}>パスワード</Text>
+  <View style={{position:'relative'}}>
+   <TextInput
+    accessibilityLabel="パスワード" value={value} onChangeText={onChangeText}
+    placeholder={placeholder} placeholderTextColor="#A1ADA6"
+    autoCapitalize="none" autoCorrect={false} autoComplete="current-password"
+    secureTextEntry={!visible}
+    style={[styles.field,{paddingRight:95}]}
+   />
+   <Pressable accessibilityRole="button"
+    accessibilityLabel={visible?'パスワードを非表示にする':'パスワードを表示する'}
+    accessibilityState={{selected:visible}}
+    onPress={()=>setVisible(current=>!current)} hitSlop={8}
+    style={{position:'absolute',right:12,top:0,bottom:0,minWidth:65,alignItems:'center',justifyContent:'center'}}>
+    <Text style={{color:C.brand,fontWeight:'800',fontSize:14}}>{visible?'非表示':'表示'}</Text>
+   </Pressable>
+  </View>
  </View>;
 }
 export function Card({children,style}:{children:ReactNode;style?:object}) {return <View style={[styles.card,style]}>{children}</View>;}

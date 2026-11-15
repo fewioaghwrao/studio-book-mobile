@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ApiError, clearToken, getMe, signInRequest, storeToken, tokenExists } from './api';
 import type { Member } from '../types';
+import { isMobileGeneralUser } from './accessPolicy.js';
 
 type Auth = {
   user: Member | null;
@@ -17,7 +18,13 @@ export function AuthProvider({children}:{children:ReactNode}) {
     try {
       if (!await tokenExists()) { setUser(null); return; }
       const res = await getMe();
-      setUser(res.isAuthenticated ? res.user ?? null : null);
+      // 既存トークンも一般会員だけ復元する（以前ログインした管理者等を残さない）
+      if (res.isAuthenticated && res.user && isMobileGeneralUser(res.user.roles)) {
+        setUser(res.user);
+      } else {
+        await clearToken();
+        setUser(null);
+      }
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) setUser(null);
       // 一時的な通信エラーではトークンを破棄しない
@@ -37,6 +44,8 @@ export function AuthProvider({children}:{children:ReactNode}) {
     try {
       const me=await getMe();
       if(!me.isAuthenticated || !me.user)throw new Error('会員情報を取得できませんでした。');
+      // Web版と異なり、モバイル版では一般会員以外をログインさせない。
+      if (!isMobileGeneralUser(me.user.roles)) throw new Error('このアプリは一般会員専用です。ホスト・管理者はWeb版をご利用ください。');
       setUser(me.user);
     } catch(e){await clearToken();setUser(null);throw e;}
   },[]);
@@ -49,4 +58,4 @@ export function useAuth() {
   if(!value)throw new Error('AuthProviderが必要です。');
   return value;
 }
-export function isGeneralUser(roles:string[]|undefined) { return Boolean(roles?.includes('GeneralUser')); }
+export function isGeneralUser(roles:string[]|undefined) { return isMobileGeneralUser(roles); }

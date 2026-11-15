@@ -32,7 +32,11 @@ export default function StudioSearch() {
  return <FlatList data={items} keyExtractor={item=>String(item.id)} style={{backgroundColor:C.background}}
   refreshControl={<RefreshControl refreshing={loading} onRefresh={()=>load(page)} tintColor={C.brand}/>} 
   ListHeaderComponent={<View style={{paddingHorizontal:18,paddingTop:19}}>
-   <View style={styles.hero}><Text style={{fontSize:11,letterSpacing:2,color:'#B9E4D8',fontWeight:'800'}}>STUDIO BOOK</Text><Text style={{color:C.white,fontSize:26,fontWeight:'800',lineHeight:35}}>ぴったりの空間を、\nスマホで予約。</Text><Text style={{color:'#D3EBE4',lineHeight:20,fontSize:13}}>練習・撮影・イベントなど、目的に合うスタジオを検索</Text></View>
+   <View style={styles.hero}><Text style={{fontSize:11,letterSpacing:2,color:'#B9E4D8',fontWeight:'800'}}>STUDIO BOOK</Text><Text style={{color:C.white,fontSize:26,fontWeight:'800',lineHeight:35}}>{"ぴったりの空間を、\nスマホで予約。"}</Text><Text style={{color:'#D3EBE4',lineHeight:20,fontSize:13}}>練習・撮影・イベントなど、目的に合うスタジオを検索</Text></View>
+   <View style={{marginTop:14}}>
+    <Button title="✦ AIでスタジオを探す" secondary onPress={()=>router.push('/rooms/ai-search')}/>
+    <Text style={{color:C.inkMuted,fontSize:12,marginTop:7}}>雰囲気・用途・人数などを文章で検索できます。</Text>
+   </View>
    <View style={{gap:13,marginTop:19,marginBottom:15}}>
     <Field label="キーワード" value={keyword} onChangeText={setKeyword} placeholder="例：ダンス、池袋、ピアノ"/>
     <View style={{flexDirection:'row',gap:10}}><View style={{flex:1}}><Field label="エリア" value={area} onChangeText={setArea} placeholder="例：豊島区" /></View><View style={{flex:1}}><Field label="上限料金（円/時）" value={maxPrice} onChangeText={setMaxPrice} keyboardType="numeric" placeholder="例：5000" /></View></View>

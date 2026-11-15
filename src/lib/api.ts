@@ -1,5 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
-import type { EditMember, LoginResponse, MeResponse } from '../types';
+import type { AiRoomSearchResponse, EditMember, LoginResponse, MeResponse } from '../types';
 
 const KEY = 'studio-book.jwt';
 const BASE = process.env.EXPO_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, '') ?? '';
@@ -54,26 +54,18 @@ export async function tokenExists() { return Boolean(await SecureStore.getItemAs
 export async function getMe() { return request<MeResponse>('/api/auth/me', {}, true); }
 export async function updateMe(form: EditMember) { return request<unknown>('/api/auth/me', {method:'PUT',body:JSON.stringify(form)},true); }
 
-export const cancellationConfig = (() => {
-  const template = process.env.EXPO_PUBLIC_CANCEL_API_PATH?.trim() || '';
-  const method = process.env.EXPO_PUBLIC_CANCEL_API_METHOD?.trim().toUpperCase() || 'POST';
-  return {
-    supported: template.startsWith('/api/') && template.includes('{id}') && ['POST','DELETE','PATCH'].includes(method),
-    template,
-    method,
-  };
-})();
-export async function cancelReservation(id: number) {
-  if (!cancellationConfig.supported) throw new Error('キャンセルAPIの設定がありません。');
-  const path = cancellationConfig.template.replace('{id}', encodeURIComponent(String(id)));
-  if (!/^\/api\/[a-zA-Z0-9/_-]+$/.test(path)) throw new Error('不正なキャンセルAPI設定です。');
-  await request<unknown>(path, {method: cancellationConfig.method}, true);
-}
-
 export function checkoutAllowed(url: string) {
   try {
     const parsed = new URL(url);
     const extra = (process.env.EXPO_PUBLIC_CHECKOUT_ALLOWED_HOSTS || '').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
     return parsed.protocol === 'https:' && (parsed.hostname.toLowerCase() === 'checkout.stripe.com' || extra.includes(parsed.hostname.toLowerCase()));
   } catch { return false; }
+}
+
+/** Web版と共通の公開AI検索。AIの秘密鍵・推論処理はAPIサーバー側のみで管理。 */
+export async function aiRoomSearch(query: string): Promise<AiRoomSearchResponse> {
+  return request<AiRoomSearchResponse>('/api/ai/room-search', {
+    method: 'POST',
+    body: JSON.stringify({ query }),
+  });
 }

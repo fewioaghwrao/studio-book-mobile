@@ -13,12 +13,26 @@ export function dateError(start, end, now = new Date()) {
   if (end.getTime() <= start.getTime()) return '終了日時は開始日時より後にしてください。';
   return null;
 }
-/** 詳細APIのcalendarEventsを表示上の目安として利用。確定判定はバックエンド。 */
+/**
+ * 詳細APIのcalendarEventsを表示上の目安として利用。確定判定はバックエンド。
+ * open は営業中の背景イベントであり、予約の衝突として扱ってはいけない。
+ */
 export function overlapsEvents(start, end, events) {
   return events.some((event) => {
-    if (!event.start || !event.end) return false;
-    const s = new Date(event.start).getTime();
-    const e = new Date(event.end).getTime();
+    if (event.type === 'open' || !event.start || !event.end) return false;
+    let s, e;
+    if (event.allDay) {
+      // FullCalendar と同じく終日は終了日が排他的。
+      const getDate = (value) => {
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+        return m ? new Date(Number(m[1]),Number(m[2])-1,Number(m[3])).getTime() : NaN;
+      };
+      s = getDate(event.start);
+      e = getDate(event.end);
+    } else {
+      s = new Date(event.start).getTime();
+      e = new Date(event.end).getTime();
+    }
     return Number.isFinite(s) && Number.isFinite(e) && start.getTime() < e && end.getTime() > s;
   });
 }

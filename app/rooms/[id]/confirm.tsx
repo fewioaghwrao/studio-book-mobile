@@ -4,29 +4,30 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Button, Card, Notice, RowInfo, Title } from '../../../src/components/UI';
 import { useAuth, isGeneralUser } from '../../../src/lib/auth';
-import { checkoutAllowed, request } from '../../../src/lib/api';
+import { request } from '../../../src/lib/api';
+import { confirmReservation, validConfirmationParams } from '../../../src/lib/bookingConfirm.js';
+import { openCheckoutUrl } from '../../../src/lib/checkoutLogic.js';
 import { displayDate, yen } from '../../../src/lib/bookingLogic.js';
 import type { ConfirmResponse } from '../../../src/types';
 import { C } from '../../../src/theme';
 export default function BookingConfirm(){
  const {id,startAt,endAt}=useLocalSearchParams<{id:string;startAt:string;endAt:string}>();const router=useRouter();const{user}=useAuth();
  const [confirm,setConfirm]=useState<ConfirmResponse|null>(null);const[loading,setLoading]=useState(false);const[paying,setPaying]=useState(false);const[error,setError]=useState('');
- const valid=id&&/^\d+$/.test(id)&&startAt&&endAt&&Number.isFinite(new Date(startAt).getTime())&&Number.isFinite(new Date(endAt).getTime())&&new Date(startAt)<new Date(endAt);
+ const valid=validConfirmationParams(Number(id), startAt, endAt);
  const check=async()=>{
    if(!valid||!user||!isGeneralUser(user.roles))return;
    setLoading(true);setError('');setConfirm(null);
    try{
-    const data=await request<ConfirmResponse>('/api/reservations/confirm',{method:'POST',body:JSON.stringify({roomId:Number(id),startAt,endAt})},true);
+    const data=await confirmReservation({roomId:Number(id),startAt,endAt,roles:user.roles}, request) as ConfirmResponse;
     setConfirm(data);
    }catch(e){setError(e instanceof Error?e.message:'空き状況を確認できませんでした。');}
    finally{setLoading(false);}
  };
  const checkout=async()=>{
    if(!confirm)return;
-   if(!checkoutAllowed(confirm.checkoutUrl)){setError('安全なStripe Checkout URLを確認できませんでした。決済を開始しません。');return;}
    setPaying(true);setError('');
    try {
-    await WebBrowser.openBrowserAsync(confirm.checkoutUrl);
+    await openCheckoutUrl(confirm.checkoutUrl, WebBrowser.openBrowserAsync, process.env.EXPO_PUBLIC_CHECKOUT_ALLOWED_HOSTS || '');
     Alert.alert('決済画面から戻りました','支払完了はサーバー側で確認されます。予約履歴を更新して状態を確認してください。',[
       {text:'予約履歴を開く',onPress:()=>router.replace('/(tabs)/reservations')},
       {text:'閉じる',style:'cancel'},

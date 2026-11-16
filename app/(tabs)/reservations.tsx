@@ -39,7 +39,7 @@ export default function Reservations(){
     {r.isUsed&&<Button title="レビューを書く" secondary onPress={()=>router.push({pathname:'/rooms/[id]/reviews/new',params:{id:String(r.roomId),reservationId:String(r.reservationId)}})}/>}
    </View>
   </Card>}
-  ListEmptyComponent={!loading&&!error?<View style={{padding:24,alignItems:'center'}}><Text style={{color:C.inkMuted}}>まだ予約履歴はありません。</Text></View>:loading?<Loading/>:null}
+  ListEmptyComponent={!loading&&!error?<View style={{padding:24,alignItems:'center'}}><Text style={{color:C.inkMuted}}>まだ予約履歴はありません。</Text></View>:loading?<Loading/>:undefined}
   ListFooterComponent={<View style={{flexDirection:'row',gap:10,padding:18}}>{page>1&&<View style={{flex:1}}><Button title="前へ" secondary onPress={()=>load(page-1)}/></View>}{page<pages&&<View style={{flex:1}}><Button title="次へ" secondary onPress={()=>load(page+1)}/></View>}</View>}
   contentContainerStyle={{paddingBottom:20}}/>;
 }

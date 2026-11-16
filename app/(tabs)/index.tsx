@@ -52,7 +52,7 @@ export default function StudioSearch() {
     <StudioImage imageName={item.imageName} style={{height:174,width:'100%'}}/>
     <View style={{padding:15,gap:7}}><Text numberOfLines={1} style={{fontSize:18,fontWeight:'800',color:C.ink}}>{item.name}</Text><Text numberOfLines={1} style={{color:C.inkMuted,fontSize:12}}>⌖  {item.address}</Text><Text style={{color:C.amber,fontSize:12}}>★ {item.averageScore?.toFixed(1)??'未評価'}  <Text style={{color:C.inkMuted}}>({item.reviewCount}件)</Text></Text><View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}><Text style={{fontWeight:'800',fontSize:20,color:C.brand}}>{yen(item.price)}<Text style={{fontSize:12,fontWeight:'500'}}> / 時間</Text></Text><Text style={{color:C.brand,fontWeight:'800'}}>詳細を見る ›</Text></View></View>
   </Pressable>}
-  ListEmptyComponent={!loading&&!error?<View style={{padding:30,alignItems:'center'}}><Text style={{color:C.inkMuted}}>条件に一致するスタジオがありません。</Text></View>:null}
+  ListEmptyComponent={!loading&&!error?<View style={{padding:30,alignItems:'center'}}><Text style={{color:C.inkMuted}}>条件に一致するスタジオがありません。</Text></View>:undefined}
   ListFooterComponent={<View style={{padding:20,gap:12,flexDirection:'row',justifyContent:'center'}}>{page>1&&<View style={{flex:1}}><Button title="前へ" secondary onPress={()=>load(page-1)} disabled={loading}/></View>}{page<pages&&<View style={{flex:1}}><Button title="次へ" secondary onPress={()=>load(page+1)} disabled={loading}/></View>}</View>}
   contentContainerStyle={{paddingBottom:25}} />;
 }

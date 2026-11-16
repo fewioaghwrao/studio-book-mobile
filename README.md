@@ -142,7 +142,7 @@ assets/                          添付資料のスタジオ写真
 ## テスト
 
 ```bash
-npm test            # Node標準テストランナーによる日時・重なり・ステータスのテスト
+npm test            # Node標準テストランナーでロジック・認証・予約確認・Stripeのテスト
 npm run typecheck   # TypeScriptの静的チェック（npm install後）
 ```
 
@@ -188,3 +188,22 @@ npx expo start --clear
 4. ログイン後、予約確認画面で空き状況と金額を再判定。決済連携の実機試験は別途実施。
 
 **検証範囲**: 予約日時・AI予約遷移のロジックはNodeテストで確認可能です。iOS/Androidの実機AI API通信、検索回数制限の応答、Stripe連携は環境ごとの統合テストが必要です。
+
+
+## 自動テスト拡張（認証・予約確認・Stripe Checkout）
+
+2026-11-17更新。**E2Eは追加していません。** `node --test` によるロジック単体テスト／モックを使用したAPI呼び出しロジックのテストです。実API、実DB、Stripe決済サーバー、iOS/Android実機には接続しません。
+
+- **認証** `tests/auth-flow.test.mjs`：ログイン／JWT保存／一般会員のみのロール判定／保存トークン復元／401時の破棄／オフライン時の保持／ログアウト
+- **認証付きHTTP** `tests/api-request.test.mjs`：Bearerヘッダー付与、認証なしの送信阻止、401/403、JSON以外の異常応答、HTTP以外のAPIベースURL拒否、204応答
+- **予約確認** `tests/booking-confirm.test.mjs`：送信先・POST本文・認証必須、日付・ID検証、403/409等の異常応答、通信エラー、料金はAPI応答の値をそのまま利用
+- **Stripe** `tests/stripe-checkout.test.mjs`：HTTPSと許可済みホスト、URLなりすまし拒否、ブラウザ起動モックと失敗処理、ブラウザ終了を決済完了と誤判定しない
+
+テストしやすいよう、UIから実際に利用する処理を `src/lib/apiRequestCore.js`、`authFlows.js`、`bookingConfirm.js`、`checkoutLogic.js` に分離しています。`api.ts` のSecureStoreとfetch、`auth.tsx` のログイン状態、予約確認画面のAPI・ブラウザ呼び出しはこれらを共通利用します。
+
+```powershell
+npm test
+npm run typecheck
+```
+
+Node.js 22以上を想定。**未検証の範囲**：バックエンドの実際の認可・二重予約防止・Stripe Webhook・決済確定、Expo実機の画面操作、テスト用決済。こうした項目は今回のモックテストだけでは保証できません。

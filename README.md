@@ -1,5 +1,7 @@
 # Studio Book Mobile
 
+[![CI](https://github.com/fewioaghwrao/studio-book-mobile/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fewioaghwrao/studio-book-mobile/actions/workflows/ci.yml)
+
 **スタジオの検索から予約・決済までをスマートフォンで操作できる、一般会員向けモバイルアプリです。**
 
 [Studio Book Web版](https://github.com/fewioaghwrao/studio-book-dotnet-next) の **ASP.NET Core Web API** を再利用し、[React Native](https://reactnative.dev/) / [Expo](https://expo.dev/) で開発しました。WebViewで既存サイトを表示するのではなく、スマートフォン向けの画面を実装しています。
